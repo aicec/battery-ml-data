@@ -48,7 +48,7 @@
     </div>
     <div class="panel">
       <div class="kpi"><div class="l">내 직선의 오차 MAE (Ah) — 앞 60사이클 기준</div><div class="v" id="mae">0.0000</div></div>
-      <div class="kpi best"><div class="l">지금까지 최고 기록</div><div class="v" id="best">—</div></div>
+      <div class="kpi best"><div class="l">내가 끌어서 만든 최고 기록</div><div class="v" id="best">—</div></div>
       <div class="kpi hit"><div class="l">이 직선이 1.6 Ah(80 %)에 닿는 사이클</div><div class="v" id="hit">—</div><small>실제 값은 수업에서 확인</small></div>
       <label class="sl">기울기 a <span id="av"></span></label>
       <input type="range" id="a" min="-0.0060" max="0.0000" step="0.00005" value="-0.0010">
@@ -70,7 +70,7 @@ const X0 = 0, X1 = 170, Y0 = 1.20, Y1 = 1.95;
 const sx = x => PL + (x - X0) / (X1 - X0) * (W - PL - PR);
 const sy = y => PT + (Y1 - y) / (Y1 - Y0) * (H - PT - PB);
 const $ = id => document.getElementById(id);
-let a = -0.0010, b = 1.800, best = Infinity, timer = null;
+let a = -0.0010, b = 1.800, best = Infinity, timer = null, fitting = false;
 
 function mae(aa, bb) { let s = 0; for (let i = 0; i < N; i++) s += Math.abs(CAP[i] - (aa * (i + 1) + bb)); return s / N; }
 function draw() {
@@ -95,7 +95,7 @@ function draw() {
   const hit = (1.6 - b) / a;
   if (a < 0 && hit > 0 && hit < X1) { ctx.strokeStyle = "#EC6516"; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(sx(hit), sy(1.6), 13, 0, Math.PI * 2); ctx.stroke(); }
   // 숫자
-  const m = mae(a, b); best = Math.min(best, m);
+  const m = mae(a, b); if (!fitting) best = Math.min(best, m);
   $("mae").textContent = m.toFixed(4); $("best").textContent = best.toFixed(4);
   $("hit").textContent = (a < 0 && hit > 0) ? Math.round(hit) + " 회차" : "닿지 않음";
   $("av").textContent = a.toFixed(5); $("bv").textContent = b.toFixed(3); $("a").value = a; $("b").value = b;
@@ -113,9 +113,9 @@ const up = () => { drag = null; };
 cv.addEventListener("mousedown", down); window.addEventListener("mousemove", move); window.addEventListener("mouseup", up);
 cv.addEventListener("touchstart", down, { passive: false }); window.addEventListener("touchmove", move, { passive: false }); window.addEventListener("touchend", up);
 // 컴퓨터가 학습 — 경사하강(사이클을 0 ~ 1로 줄여서 안정)
-function stop() { if (timer) { cancelAnimationFrame(timer); timer = null; } }
+function stop() { if (timer) { cancelAnimationFrame(timer); timer = null; } fitting = false; }
 $("fit").onclick = () => {
-  stop(); let step = 0, ap = a * N, bp = b; const lr = 0.6;
+  stop(); fitting = true; let step = 0, ap = a * N, bp = b; const lr = 0.6;
   const tick = () => {
     for (let k = 0; k < 2; k++) {
       let ga = 0, gb = 0;
@@ -123,7 +123,7 @@ $("fit").onclick = () => {
       ap -= lr * ga; bp -= lr * gb; step++;
     }
     setAB(ap / N, bp); $("steps").textContent = "걸음 " + step + " · 오차 " + mae(a, b).toFixed(4) + " Ah";
-    if (step < 600) timer = requestAnimationFrame(tick); else { timer = null; $("steps").textContent += " · 끝 (더 고칠 게 없음)"; }
+    if (step < 600) timer = requestAnimationFrame(tick); else { timer = null; fitting = false; $("steps").textContent += " · 끝 (더 고칠 게 없음)"; }
   };
   tick();
 };
