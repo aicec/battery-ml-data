@@ -55,5 +55,11 @@ B0018의 충전 · 사이클 · 내부 저항 열만 있고 **용량과 방전 �
 | 일차 | 수강생용 |
 |---|---|
 | 1일차 · 내 배터리는 몇 살인가 | https://colab.research.google.com/github/aicec/battery-ml-data/blob/main/notebooks/day1_student.ipynb |
+| 2일차 · 80%가 되는 때를 미리 알기 — 머신러닝 | https://colab.research.google.com/github/aicec/battery-ml-data/blob/main/notebooks/day2_student.ipynb |
 
 열리면 **파일 → Drive에 사본 저장**을 먼저 누르세요. 완성본은 수업 뒤에 올라옵니다.
+
+## 브라우저 활동
+| 활동 | 주소 |
+|---|---|
+| 2일차 · 직선 끌기(학습 = 틀린 만큼 고치기) | https://aicec.github.io/battery-ml-data/web/line.html |
